@@ -1,0 +1,14 @@
+---
+- name: Creat a login user
+  user:
+    name: testuser
+    password: '1234'
+    groups:
+      -  students
+      -  wheel
+      -  operator
+    state: present
+    shell: /bin/bash
+    system: no
+    createhome: yes
+    home: /home/testuser

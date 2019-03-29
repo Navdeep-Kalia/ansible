@@ -1,0 +1,53 @@
+Ansible is a radically simple IT automation platform that makes your applications and systems easier to deploy. Avoid writing scripts or custom code to deploy and update your applications— automate in a language that approaches plain English, using SSH, with no agents to install on remote systems.
+
+In our vagrant file the acs is used as ansible master where ansible is intalled and the other two db and webserver are used as nodes that can be used for example
+The acs VM is using ubuntu version 14.04.6 LTS
+
+To install ansible (https://www.cyberciti.biz/faq/how-to-install-and-configure-latest-version-of-ansible-on-ubuntu-linux/):
+$ sudo apt update
+$ sudo apt update
+$ sudo apt upgrade
+$ sudo apt install software-properties-common
+$ $ sudo apt update
+$ sudo apt install ansible
+
+Add other hosts 
+$ sudo vi /etc/ansible/hosts   Or   $ vi $HOME/hosts
+
+e.g.,
+[webservers]
+server1.cyberciti.biz
+104.20.187.5
+104.20.186.5
+
+[devservers]
+10.98.222.4
+10.98.222.7
+10.98.222.8
+
+Generate public key on acs to talk to remote systems
+$ ssh-keygen -t rsa -b 4096 -C "My ansisble key" (HINT: KEEP PRESSING ENTER TO SELECT DEFAULT VALUES)
+
+copy key into remote systems
+$ ssh-copy-id -i /home/vagrant/.ssh/id_rsa.pub vagrant@192.168.33.30
+$ ssh-copy-id -i /home/vagrant/.ssh/id_rsa.pub vagrant@192.168.33.20
+
+send ping request to all servers
+$ ansible -i ~/hosts -m ping all
+ 
+find out uptime of all hosts
+$ ansible -i ~/hosts -m shell -a 'uptime' all
+-i - specify inventory host path
+-m - module name of ansible to be used
+-a - module arguments
+all - means all hosts
+
+==============================================================LABS=================================
+lab: 1
+Create 5 users called user1, user2, user3, user4, user5. each user should use /bin/bash as their default shell. Create a home directory with the same name as the user
+for each. The users are part of the following groups: students, wheel, operator.
+Each user has a default password of login.
+
+==============================================================LINKS============================
+https://www.devopsschool.com/tutorial/ansible/labs/index.html
+https://docs.ansible.com/ansible/latest/modules/user_module.html
