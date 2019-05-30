@@ -1,0 +1,7 @@
+value=raw_input("please enter your value here: ")
+if len(value)>8:
+	print "error mate only want 8 characters!!!"
+elif len(value)<8:
+	print value[2:4]
+	print value[1:5]
+	print value[2:]

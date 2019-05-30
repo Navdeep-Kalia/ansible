@@ -1,0 +1,5 @@
+s="0123456789"
+value= len(s)
+print value
+print "the third character is: "+s[2]
+print "the fifth character is: "+s[4]

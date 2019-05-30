@@ -1,0 +1,20 @@
+print "exercise 1";
+print "------------"
+print "hello world";
+print " "
+print "exercise 2"
+print "------------"
+values =["Bread","Milk","Eggs","Tea"]
+print "To Buy: "
+print "******"
+print "  "
+for i in values:
+	print i;
+
+print " "
+print "exercise 3"
+print "----------"
+print "i can't afford to buy the car \n i don't have the money \n it has A\C and P\S"
+
+
+

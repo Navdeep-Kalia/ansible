@@ -1,0 +1,4 @@
+vlen=raw_input("please enter the value here: ")
+i=0
+print(vlen[0] + '\n' + vlen[1] + '\n' + vlen[2] + '\n' + vlen[3] + '\n')
+

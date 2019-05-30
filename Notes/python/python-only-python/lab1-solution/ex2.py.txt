@@ -1,0 +1,23 @@
+print " "
+print "exercise 4"
+print "----------"
+number=[1,2,3,4,5,6,7]
+add=0
+for i in number:
+	add=i+add
+print add
+
+age=[65,15,45]
+addAge=0
+for i in age:
+	addAge=addAge+i
+addAge=addAge/len(age)
+print addAge
+
+print 4356/61
+print 4356%61
+print 2**20
+
+price=[34.99,29.95,31.50]
+print min(price)
+print max(price)

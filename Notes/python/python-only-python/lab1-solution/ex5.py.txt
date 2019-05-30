@@ -1,0 +1,9 @@
+a=6
+b=7
+c=(a+b)/2
+print c
+
+list=["paper","stapels","pencils"]
+print list
+inventory=list
+print inventory

@@ -1,0 +1,300 @@
+package com.itunes.library_project.ITunesLibraryProject.utility;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import com.itunes.library_project.ITunesLibraryProject.entities.Device;
+import com.itunes.library_project.ITunesLibraryProject.entities.PlayList;
+import com.itunes.library_project.ITunesLibraryProject.entities.PlaylistTrack;
+import com.itunes.library_project.ITunesLibraryProject.entities.Track;
+import com.itunes.library_project.ITunesLibraryProject.entities.User;
+import com.itunes.library_project.ITunesLibraryProject.services.Service;
+import com.parser.object.Array;
+import com.parser.object.Dict;
+import com.parser.object.Key;
+import com.parser.object.ObjectFactory;
+import com.parser.object.Plist;
+
+import javax.ejb.EJB;
+import javax.ejb.Local;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.JAXBIntrospector;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
+
+@Path("/parsexml")
+@Stateless
+public class Demo {
+
+	@EJB
+	private Service service;
+
+	@PersistenceContext
+	private EntityManager em;
+	//java.lang.String libraryId=null;
+
+	public Demo(){}
+	private String fileName = "";
+	private java.lang.String deviceid;
+	private Collection<Device>deviceList=new ArrayList<Device>();
+	private Collection<PlayList>playlistList=new ArrayList<PlayList>();
+	private Collection<PlaylistTrack>playlistTrackList=new ArrayList<PlaylistTrack>();
+	private Collection<Track>trackList=new ArrayList<Track>();
+
+	private List<Object> childTracksDict=null;
+	private List<Object> childTrackKeyDict=null;
+	private List<Object> PlaylistDict=null;
+	private List<Object> PlaylistArray=null;
+	private List<Object> childPlaylistsArray=null;
+	private List<Object> playlistItemsArray=null;
+	List<Object> playlistItemsArrayDict=null;
+
+	User user=new User(1,"Navi","1234");
+
+	@POST
+	@Path("/dataInDB")
+	@Consumes("multipart/form-data")
+	public void uploadFile(MultipartFormDataInput input) {
+
+		Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
+		List<InputPart> inputParts = uploadForm.get("uploadedFile");
+		for (InputPart inputPart : inputParts) {
+			MultivaluedMap<String, String> header = inputPart.getHeaders();
+			fileName = getFileName(header);
+
+			if(fileName.startsWith("C:")){
+				System.out.println("c*******************"+fileName);
+				try {
+					processTheFile(fileName);
+				} catch (JAXBException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}		
+			}else{
+				String fullPath="C:\\Users\\Navdeep\\Desktop\\DSA\\";
+				fileName=fullPath+fileName;
+				System.out.println("c:--********************"+fileName);
+				try {
+					processTheFile(fileName);
+				} catch (JAXBException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}	
+			}
+
+		}
+
+	}
+
+	private String getFileName(MultivaluedMap<String, String> header) {
+		String[] contentDisposition = header.getFirst("Content-Disposition").split(";");
+		for (String filename : contentDisposition) {
+			if ((filename.trim().startsWith("filename"))) {
+				String[] name = filename.split("=");
+				String finalFileName = name[1].trim().replaceAll("\"", "");
+				return finalFileName;
+			}
+		}
+		return "unknown";
+	}
+
+	//public void processTheFile(java.lang.String value) throws JAXBException{
+	public void processTheFile(String filePath) throws JAXBException{
+		JAXBContext jaxbContext = JAXBContext.newInstance(ObjectFactory.class);
+		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+		Plist plists=null;
+		boolean validFile=false;
+		try{
+			//plists = (Plist) jaxbUnmarshaller.unmarshal( new File("C:\\Users\\Navdeep\\Desktop\\DSA\\iTunes Music Library1.xml") );
+			plists = (Plist) jaxbUnmarshaller.unmarshal( new File(filePath) );
+			validFile=true;
+		}catch(Exception ex){
+			System.out.println("Not valid!!!");
+			validFile=false;
+		}
+		if(validFile){
+			List<Object> rootObject= plists.getArrayOrDataOrDateOrDictOrRealOrIntegerOrStringOrTrueOrFalse();
+			Dict rootDict=(Dict) rootObject.get(0);
+			List<Object> childOfRootDict= rootDict.getKeyOrArrayOrDataOrDateOrDictOrRealOrIntegerOrStringOrTrueOrFalse();
+			for(int i=0;i<childOfRootDict.size();i++)
+			{
+				System.out.print("The tag is:--> "+childOfRootDict.get(i).getClass().getSimpleName()+" value is: ");
+				if(childOfRootDict.get(i).getClass().getName().equals("com.parser.object.Key")){
+					System.out.println(((Key)childOfRootDict.get(i)).getvalue());
+					if(((Key)childOfRootDict.get(i)).getvalue().equals("Library Persistent ID")){
+						System.out.println("!!!!Library id!!!!");
+						System.out.println(((com.parser.object.String)childOfRootDict.get(i+1)).getvalue());
+						deviceid=((String)(((com.parser.object.String)childOfRootDict.get(i+1)).getvalue()));
+						System.out.println("------------------"+deviceid);
+						//em.createQuery("select e from User e where e.username = :Navi", Module.class).setParameter("status", status).getResultList();
+						//User user1=(User) em.createQuery("select u from User u where u.username = :Navi",User.class);
+						//System.out.println("@@@@@@....@@@@@@....@@@@@");
+						//System.out.println(user1.getUser_Id());
+						service.addDevice(new Device(deviceid, em.find(User.class, 1)));
+						//service.addDevice(new Device(deviceid,user));
+					}
+
+					if(((Key)childOfRootDict.get(i)).getvalue().equals("Music Folder")){
+						System.out.println("!!!!!Music Folder!!!!");
+						System.out.println(((com.parser.object.String)childOfRootDict.get(i+1)).getvalue());
+					}
+
+					if(((Key)childOfRootDict.get(i)).getvalue().equals("Tracks")){
+						Dict tracksDict=(Dict)childOfRootDict.get(i+1);
+						childTracksDict=tracksDict.getKeyOrArrayOrDataOrDateOrDictOrRealOrIntegerOrStringOrTrueOrFalse();
+						System.out.println("The total size of tracksDict is: "+childTracksDict.size());
+					}
+
+					if(((Key)childOfRootDict.get(i)).getvalue().equals("Playlists")){
+						Array playlistsArray=(Array)childOfRootDict.get(i+1);
+						childPlaylistsArray=playlistsArray.getArrayOrDataOrDateOrDictOrRealOrIntegerOrStringOrTrueOrFalse();
+						System.out.println("The total size of playlistArray is: "+childPlaylistsArray.size());
+					}
+				}//end of if statemet--childRootDict
+			}//end of for statement--childRootDict
+
+			System.out.println("***********************************************************************************");
+			getTrackData();
+			//getPlaylistData();
+			/*this for loop is used to get the data out of tracks dict the tracks are saved with the key tracks
+			 * and thus we are saving tracks detail above and get the data out for track*/
+		}
+
+	}
+	public void getTrackData(){
+		
+		Integer trackId=null;
+		java.lang.String trackName = null;
+		java.lang.String album=null;
+		java.lang.String artist=null;
+		java.lang.String genre=null;
+
+		for(int i=0;i<childTracksDict.size();i++){
+			//System.out.print(childTracksDict.get(i).getClass().getSimpleName());
+			if(childTracksDict.get(i).getClass().getName().equals("com.parser.object.Dict")){
+				//System.out.println("  Track id is:= "+((Key)childTracksDict.get(i)).getvalue());
+				Dict trackskeyDict=(Dict)childTracksDict.get(i);
+				childTrackKeyDict=trackskeyDict.getKeyOrArrayOrDataOrDateOrDictOrRealOrIntegerOrStringOrTrueOrFalse();
+
+				for(int j=0;j<childTrackKeyDict.size();j++){
+
+					if(childTrackKeyDict.get(j).getClass().getName().equals("com.parser.object.Key")){
+						if(((Key)childTrackKeyDict.get(j)).getvalue().equals("Track ID")){
+							System.out.print(((Key)childTrackKeyDict.get(j)).getvalue()+" is ");
+							System.out.println(((com.parser.object.Integer)childTrackKeyDict.get(j+1)).getvalue());
+							trackId=Integer.parseInt(((com.parser.object.Integer)childTrackKeyDict.get(j+1)).getvalue());
+						}
+
+						if(((Key)childTrackKeyDict.get(j)).getvalue().equals("Name")){
+							System.out.print(((Key)childTrackKeyDict.get(j)).getvalue()+" is ");
+							System.out.println(((com.parser.object.String)childTrackKeyDict.get(j+1)).getvalue());
+							trackName=(String)(((com.parser.object.String)childTrackKeyDict.get(j+1)).getvalue());
+						}
+
+						if(((Key)childTrackKeyDict.get(j)).getvalue().equals("Artist")){
+							System.out.print(((Key)childTrackKeyDict.get(j)).getvalue()+" is ");
+							System.out.println(((com.parser.object.String)childTrackKeyDict.get(j+1)).getvalue());
+							artist=(String)(((com.parser.object.String)childTrackKeyDict.get(j+1)).getvalue());
+						}
+
+						if(((Key)childTrackKeyDict.get(j)).getvalue().equals("Album")){
+							System.out.print(((Key)childTrackKeyDict.get(j)).getvalue()+" is ");
+							System.out.println(((com.parser.object.String)childTrackKeyDict.get(j+1)).getvalue());
+							album=(String)(((com.parser.object.String)childTrackKeyDict.get(j+1)).getvalue());
+						}
+
+						if(((Key)childTrackKeyDict.get(j)).getvalue().equals("Genre")){
+							System.out.print(((Key)childTrackKeyDict.get(j)).getvalue()+" is ");
+							System.out.println(((com.parser.object.String)childTrackKeyDict.get(j+1)).getvalue());
+							genre=(String)(((com.parser.object.String)childTrackKeyDict.get(j+1)).getvalue());
+						}
+
+					}//end of if-statement--childTrackKeyDict
+				
+					
+					
+				}//end of for statement--childTrackKeyDit
+				
+				System.out.println("****************");	
+				trackList.add(new Track(trackId,trackName,album,artist,genre));
+
+			}//end of if-statement--childTrackDict
+		}//end of for-statement--childTrackDict
+
+		//System.out.println(trackList.size());
+		service.addTracks(trackList);
+		
+	}
+
+	public void getPlaylistData(){
+		System.out.println("i am here now...."+childPlaylistsArray.size());
+		for(int m=0;m<childPlaylistsArray.size();m++){
+
+			if(childPlaylistsArray.get(m).getClass().getName().equals("com.parser.object.Dict")){
+				Dict playlistDict=(Dict)childPlaylistsArray.get(m);
+				PlaylistDict=playlistDict.getKeyOrArrayOrDataOrDateOrDictOrRealOrIntegerOrStringOrTrueOrFalse();
+
+				for(int n=0;n<PlaylistDict.size();n++){
+					if(PlaylistDict.get(n).getClass().getName().equals("com.parser.object.Key")){
+
+						if(((Key)PlaylistDict.get(n)).getvalue().equals("Name")){
+							System.out.print(((Key)PlaylistDict.get(n)).getvalue()+" is ");
+							System.out.println(((com.parser.object.String)PlaylistDict.get(n+1)).getvalue());
+						}
+
+						if(((Key)PlaylistDict.get(n)).getvalue().equals("Playlist ID")){
+							System.out.print(((Key)PlaylistDict.get(n)).getvalue()+" is ");
+							System.out.println(((com.parser.object.Integer)PlaylistDict.get(n+1)).getvalue());
+						}
+
+						if(((Key)PlaylistDict.get(n)).getvalue().equals("Playlist Items")){
+							Array playlistItemsArrayObject=(Array)PlaylistDict.get(n+1);
+							playlistItemsArray=playlistItemsArrayObject.getArrayOrDataOrDateOrDictOrRealOrIntegerOrStringOrTrueOrFalse();
+							System.out.println("The total size of playlistItemsArray is: "+playlistItemsArray.size());
+
+							for(int p=0;p<playlistItemsArray.size();p++){
+								if(playlistItemsArray.get(p).getClass().getName().equals("com.parser.object.Dict")){
+
+									Dict playlistItemsArrayDictObject=(Dict)playlistItemsArray.get(p);
+									playlistItemsArrayDict=playlistItemsArrayDictObject.getKeyOrArrayOrDataOrDateOrDictOrRealOrIntegerOrStringOrTrueOrFalse();
+									for(int i=0;i<playlistItemsArrayDict.size();i++){
+										System.out.print(((Key)playlistItemsArrayDict.get(i)).getvalue()+" is ");
+										System.out.println(((com.parser.object.Integer)playlistItemsArrayDict.get(i+1)).getvalue());
+										i=i+1;
+									}//end of for loop for play listItems array Dict
+								}//end of if statement for playlistItems array
+							}//end of for loop for play list items array
+						}//end of if statement for playlistDict
+
+					}//end of if statement
+
+				}//end of for loop playlistDict
+
+			}//end of if statement
+
+		}//end of child playlist Array		
+	}//end of if---validfile
+	//end of public static void main
+	//end of class
+}

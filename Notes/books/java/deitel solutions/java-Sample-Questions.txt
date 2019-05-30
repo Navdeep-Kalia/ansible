@@ -1,0 +1,57 @@
+What is the purpose of keyword new?"explain what happens when you use
+it?
+ It creates a new instance of an object or class. 
+ It is also used to create a new array. 
+keyword "new" request memory from the system to store an object,
+then calls the corresponding class s constructor to initialize the object. 
+-------------------------------------------------------------------------------------------------------------------
+what is a default constructor?how are an objects instance variables initialized if a class has only a default constructor?
+
+A default constructor is a constructor that either has no parameters, or if it has parameters, all the parameters have default values.
+ If no user-defined constructor exists for a class A and one is needed, the compiler implicitly declares a constructor.Java assigns default values to 
+instance variables using default constructor. No, not really. It automatically assigns default values to all members prior to executing any constructor.
+But if we define our own constructor then how does java give default values (because when we write our constructor then, then default constructor is not added).
+------------------------------------------------------------------------------------------------------------------
+explain the purpose of an instance variable?
+ an instance variable is a variable defined in a class (i.e. a member variable), for which each instantiated object of the class has a separate copy, or instance.
+All object instances have their own copies of instance variables. One object instance can change values of its instance variables without affecting all other instances.
+Instance variables can be used by all methods of a class unless the methods are marked with "static" modifier.
+You access instance variables directly from their containing object instances
+=============================================================================================
+most classes need to be imported before they can be used in an application.why is every application allowed to use classes system and String without first importing 
+them?
+Basically the compiler checks if you are using any class of the java.lang package and imports it automatically for you. 
+===============================================================================================
+explain how program could use class scanner without importing it?
+
+ You could use the fully qualified name of the class instead of just "Scanner". 
+ For example: 
+ java.util.Scanner s = new Scanner(System.in); 
+ The only reason for using the "import" statement is so that you don't have to use the fully qualified name for commonly used classes.
+==================================================================================================
+explain why a class might provide a set method and a get method for an instance variable?
+
+It is for the principle called Information Hiding or Encapsulation. They are both the same thing.  Encapsulation is basically hiding all of the information about a class
+in a class. All of the variables for the class should be private. This way, other programs or classes cannot change the information of the class.  The infomation held 
+in the vaiables is also called the state. Therefore, the state of the class cannot be changed by other classes or programs without the class knowing.  So if you use
+Information Hiding, there is no way for another class or program to see the state of the class.  To see the state fo the class, you use what is known as accessor methods.
+These are the 'get' methods.  To change the state of a class, you use which is known as mutator methods. These are the 'set' methods. 
+=========================================================================================================
+compare and contrast the if-single selection statement and the while repititon statement?how are these two statements are similar and how are they different?
+
+If single selection is a statement in Java that evaluates to True or False meaning that if the statement results in True the work gets done on the true side, 
+if its evaluated false the true side gets ignored and the next line of code gets executed
+
+The while loop in Java means exactly that, while statement is true that loop will execute until the condition is met or becomes false. 
+
+Both of this statements, are similar that both have to evaluate if something is either true or false meaning that a certain condition 
+has to be met in order for them to execute or skip a line of code. 
+
+The main difference between the if single-selection and the while loop in Java is that the if condition only does what is being asked in the true side of the program,
+ in a while loop in Java the line of code gets executed over and over until the condition is met so the loop terminates. 
+==========================================================================================================
+
+link to answers for deitel and deitel:
+
+http://cs.sbcc.edu/~rhd/comsc120/javaanswer/
+

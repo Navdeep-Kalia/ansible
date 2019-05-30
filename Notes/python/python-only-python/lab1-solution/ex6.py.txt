@@ -1,0 +1,6 @@
+print 17-9<10
+sum =8+23
+if sum < 100:
+	print
+elif sum >100:
+	print

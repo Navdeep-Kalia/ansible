@@ -1,0 +1,5 @@
+value=raw_input("please enter the value here:  ")
+i=len(value)
+while i > 0:
+	print value[i-1]
+	i-=1

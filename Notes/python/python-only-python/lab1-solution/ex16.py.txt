@@ -1,0 +1,2 @@
+result=int(365*24*60*60)
+print "The number of seconds are: "+str(result)
